@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HazMapper Flood Sensors</title>
+<meta name="description" content="What the HazMapper flood sensor of the Urban Flood Observation Network is, why it is useful, how it protects privacy, what to do if you find one, and how to host one.">
+<style>
+  :root {
+    --bg: #f7f9fa;
+    --surface: #ffffff;
+    --text: #1b2429;
+    --muted: #4a5760;
+    --border: #d5dde2;
+    --accent: #0a6680;
+    --accent-soft: #e3f1f5;
+    --warn: #7a4200;
+    --warn-soft: #fff3e0;
+    --ok: #1f6b3a;
+    --no: #9b2c2c;
+    --focus: #0a6680;
+    --todo: #fff1a8;
+    --todo-text: #4a3d00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11171b;
+      --surface: #182126;
+      --text: #e6edf0;
+      --muted: #a3b2ba;
+      --border: #2c3a42;
+      --accent: #5cc3e0;
+      --accent-soft: #15313b;
+      --warn: #ffb866;
+      --warn-soft: #33240f;
+      --ok: #6fd49a;
+      --no: #ff9090;
+      --focus: #8fd8ee;
+      --todo: #4a3d00;
+      --todo-text: #fff1a8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11171b; --surface: #182126; --text: #e6edf0; --muted: #a3b2ba;
+    --border: #2c3a42; --accent: #5cc3e0; --accent-soft: #15313b;
+    --warn: #ffb866; --warn-soft: #33240f; --ok: #6fd49a; --no: #ff9090;
+    --focus: #8fd8ee; --todo: #4a3d00; --todo-text: #fff1a8;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); text-underline-offset: 0.15em; }
+  a:focus-visible, summary:focus-visible, .table-scroll:focus-visible {
+    outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px;
+  }
+  .skip {
+    position: absolute; left: 16px; top: -100px;
+    background: var(--surface); color: var(--text);
+    padding: 10px 16px; border: 2px solid var(--focus); border-radius: 6px; z-index: 10;
+  }
+  .skip:focus { top: 12px; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+  header.hero {
+    background: var(--accent-soft);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 0 40px;
+  }
+  .hero h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.2; margin: 0 0 12px; }
+  .hero p.lead { font-size: 1.15rem; margin: 0 0 20px; max-width: 40em; }
+  nav.jump ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  nav.jump a {
+    display: inline-block; padding: 8px 14px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+    text-decoration: none; color: var(--text); font-size: 0.95rem;
+  }
+  nav.jump a:hover { border-color: var(--accent); text-decoration: underline; }
+  section { padding: 40px 0 8px; }
+  h2 { font-size: 1.6rem; margin: 0 0 12px; line-height: 1.25; }
+  h3 { font-size: 1.15rem; margin: 24px 0 8px; }
+  .notice {
+    background: var(--warn-soft); border-left: 5px solid var(--warn);
+    padding: 16px 20px; border-radius: 6px; margin: 16px 0;
+  }
+  .hero .notice { margin: 0 0 24px; max-width: 40em; }
+  .notice strong { color: var(--warn); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 16px; margin: 16px 0; padding: 0; list-style: none; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .card h3 { margin-top: 0; }
+  .card p { margin: 0; color: var(--muted); }
+  ol.steps { padding-left: 1.4em; }
+  ol.steps li { margin-bottom: 8px; }
+  ol.flow { list-style: none; padding: 0; margin: 24px 0 8px; max-width: 34em; display: flex; flex-direction: column; gap: 28px; }
+  ol.flow li {
+    position: relative;
+    background: var(--surface); border: 2px solid var(--border); border-radius: 8px; padding: 12px 14px;
+  }
+  ol.flow li.sent { background: var(--accent-soft); border-color: var(--accent); }
+  ol.flow li:not(:last-child)::after {
+    content: ""; position: absolute; left: 50%; bottom: -24px; margin-left: -8px;
+    border: 8px solid transparent; border-top: 12px solid var(--muted); border-bottom: 0;
+  }
+  ol.flow .where { display: block; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+  ol.flow .what { display: block; font-weight: 600; }
+  ol.flow .how { display: block; font-size: 0.92rem; color: var(--muted); }
+  .flow-note { color: var(--muted); font-size: 0.92rem; }
+  /* Sideways when there is room for four boxes; the em width also switches it back when text is enlarged */
+  .flow-wrap { container-type: inline-size; }
+  @container (min-width: 40em) {
+    ol.flow { flex-direction: row; max-width: none; }
+    ol.flow li { flex: 1 1 0; min-width: 0; }
+    ol.flow li:not(:last-child)::after {
+      left: auto; right: -22px; top: 50%; bottom: auto; margin: -8px 0 0 0;
+      border: 8px solid transparent; border-left: 12px solid var(--muted); border-right: 0;
+    }
+  }
+  .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px; margin: 20px 0 8px; }
+  .compare figure {
+    margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  }
+  .compare img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 6px; background: var(--border); }
+  .compare figcaption { margin-top: 10px; font-size: 0.95rem; color: var(--muted); }
+  .compare figcaption strong { display: block; color: var(--text); font-size: 1rem; }
+  .key { display: flex; flex-wrap: wrap; gap: 4px 16px; list-style: none; padding: 0; margin: 6px 0 0; }
+  .key li::before {
+    content: ""; display: inline-block; width: 0.9em; height: 0.9em; margin-right: 6px;
+    vertical-align: -0.1em; border: 1px solid var(--muted); background: var(--swatch);
+  }
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; background: var(--surface); border: 1px solid var(--border); }
+  caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  tbody th { font-weight: 600; }
+  td.yes { color: var(--ok); font-weight: 600; white-space: nowrap; }
+  td.no { color: var(--no); font-weight: 600; white-space: nowrap; }
+  details {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; margin: 10px 0;
+  }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 10px 0 2px; color: var(--muted); }
+  mark.todo { background: var(--todo); color: var(--todo-text); padding: 0 4px; border-radius: 3px; }
+  #technical { border-top: 1px solid var(--border); margin-top: 40px; }
+  footer { border-top: 1px solid var(--border); margin-top: 48px; padding: 24px 0 40px; color: var(--muted); font-size: 0.92rem; }
+  @media print {
+    .skip, nav.jump { display: none; }
+    header.hero { padding: 16px 0; }
+    details { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>This is a HazMapper flood sensor</h1>
+    <p class="lead">A small, solar-powered research instrument that watches an area for flooding and reports where water spreads. It is part of the Urban Flood Observation Network (UFONet), a Syracuse University research project funded by the U.S. Geological Survey (USGS) that studies urban and riverside flooding.</p>
+    <div class="notice">
+      <strong>Found one? Please leave it where it is.</strong> It is installed with the property owner's permission, and moving it ruins its measurements. <a href="#found-one">What to do if you found a sensor</a>.
+    </div>
+    <nav class="jump" aria-label="On this page">
+      <ul>
+        <li><a href="#why">Why it is useful</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="#found-one">I found one</a></li>
+        <li><a href="#host">Host a sensor</a></li>
+        <li><a href="#faq">Questions</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#technical">How it works</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap" tabindex="-1">
+
+<section id="why" aria-labelledby="why-h">
+  <h2 id="why-h">Why these sensors are useful</h2>
+  <p>Flooding in towns and along small streams is often fast and local. Rain gauges measure how much rain falls, river gauges measure one point on large rivers, and satellites see large regions but can't see through the clouds that come with storms. Very little measures how far water spreads, street by street, field by field, as it happens.</p>
+  <ul class="cards">
+    <li class="card">
+      <h3>Sees the flood</h3>
+      <p>Each sensor records how much of the area it watches is underwater, including when roads and riverbanks are first going under.</p>
+    </li>
+    <li class="card">
+      <h3>Works through a storm</h3>
+      <p>It runs on solar power and sends its reports using long-range radio or its cellular modem. Floods often cut electricity and internet service, but the sensor doesn't require either.</p>
+    </li>
+    <li class="card">
+      <h3>Sensors warn each other</h3>
+      <p>When one sensor detects flooding, any nearby sensors start reporting more often until the water level goes down.</p>
+    </li>
+    <li class="card">
+      <h3>Flood maps</h3>
+      <p>Each sensor's view is matched to map coordinates, so its results become a flood map that planners can use.</p>
+    </li>
+    <li class="card">
+      <h3>Better planning</h3>
+      <p>A record of where water goes and how fast helps target drainage repairs, validate flood forecasts, and plan roads, drains, and other infrastructure.</p>
+    </li>
+    <li class="card">
+      <h3>Open and low cost</h3>
+      <p>The hardware and software are open source and use off-the-shelf parts, so communities and agencies can build and use their own.</p>
+    </li>
+  </ul>
+</section>
+
+<section id="privacy" aria-labelledby="privacy-h">
+  <h2 id="privacy-h">Privacy</h2>
+  <p><strong>The sensor is used only to measure flooding.</strong> Each one is aimed at an area that might flood, such as a stream bank, a drainage channel, or a low spot, and positioned so that homes, windows, and footpaths are out of view whenever possible. What it sends out is a simple map of where water is, plus information about its own health.</p>
+
+  <div class="compare">
+    <figure>
+      <img src="images/scene-800.webp" srcset="images/scene-480.webp 480w, images/scene-800.webp 800w"
+           sizes="(min-width: 860px) 400px, (min-width: 640px) 45vw, 92vw"
+           width="800" height="600" loading="lazy" decoding="async"
+           alt="Example photo from a sensor on a lake shore: calm gray water on the left, large rocks and dry grass along the bank on the right, bare trees and a distant far shore under an overcast sky.">
+      <figcaption><strong>What the sensor sees</strong>An example photo from a sensor. Photos are deleted from the sensor automatically.</figcaption>
+    </figure>
+    <figure>
+      <img src="images/water-map.png" width="800" height="600" loading="lazy" decoding="async"
+           alt="The water map made from that photo: a flat two-color image, blue where the sensor found water and pale where it did not. The blue area follows the outline of the lake; the rocks, trees and shore are a single pale area with no detail.">
+      <figcaption><strong>What is sent to us</strong>The water map for the same scene, which is much smaller than the photo and can't identify any people or objects. Each point is marked either &ldquo;water&rdquo; or &ldquo;not water.&rdquo;
+        <ul class="key">
+          <li style="--swatch: #1f6fb2">Water</li>
+          <li style="--swatch: #ece6d6">Not water</li>
+        </ul>
+      </figcaption>
+    </figure>
+  </div>
+
+  <h3>How photos are handled</h3>
+  <ul>
+    <li><strong>Photos are not part of the regular reports.</strong> The sensor works out where the water is on its own and sends only the result.</li>
+    <li><strong>Photos are deleted automatically</strong> from the sensor at regular intervals.</li>
+    <li><strong>A few photos may be saved for research.</strong> Researchers may keep photos that do not show people, vehicles, license plates, homes, or anything else that could affect someone's privacy. These photos are used only to improve flood detection. They are collected in person or over an encrypted connection, and only approved members of the research team, using multi-factor authentication, can access the sensors.</li>
+  </ul>
+
+  <div class="table-scroll" tabindex="0" role="region" aria-labelledby="sent-caption">
+  <table>
+    <caption id="sent-caption">What leaves the sensor</caption>
+    <thead><tr><th scope="col">Data</th><th scope="col">Sent?</th><th scope="col">Details</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Water map</th><td class="yes">Yes</td><td>A grid of water / not-water cells. It contains no picture detail: no faces, colors, or text.</td></tr>
+      <tr><th scope="row">Temperature and humidity inside the box, battery level</th><td class="yes">Yes</td><td>For checking the sensor's health.</td></tr>
+      <tr><th scope="row">Tilt</th><td class="yes">Yes</td><td>How far the box has tilted since it was installed, so we can tell if it has been moved or knocked.</td></tr>
+      <tr><th scope="row">Sensor's own location</th><td class="yes">Yes</td><td>The position of the box, so the water map can be placed on a map.</td></tr>
+      <tr><th scope="row">Photos</th><td class="no">No</td><td>Not part of the regular reports. Photos are deleted from the sensor automatically, and researchers may save a few that do not show people, vehicles, license plates, or homes.</td></tr>
+      <tr><th scope="row">Information about phones or other devices nearby</th><td class="no">No</td><td>The sensor does not scan for or log phones, Wi-Fi, or Bluetooth devices.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 id="example-h">An example report</h3>
+  <p>These values come from a single report sent by unit UFO-006 on November 10, 2026. Some readings, such as the position of the box, are left out of this example.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-labelledby="example-caption">
+  <table>
+    <caption id="example-caption">Example values from one report</caption>
+    <thead><tr><th scope="col">Reading</th><th scope="col">Value</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Share of the view that is water</th><td>46%</td></tr>
+      <tr><th scope="row">Temperature inside the box</th><td>53 °F (11.5 °C)</td></tr>
+      <tr><th scope="row">Humidity inside the box</th><td>57%</td></tr>
+      <tr><th scope="row">Low-power warning</th><td>None</td></tr>
+      <tr><th scope="row">Water map</th><td>Like the one shown above</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="found-one" aria-labelledby="found-h">
+  <h2 id="found-h">If you found a sensor</h2>
+  <div class="notice">
+    <strong>Please leave it where it is.</strong> It is installed with the property owner's permission and aimed at a fixed view. Moving or turning it, even slightly, ruins the measurements it has collected so far.
+  </div>
+  <ol class="steps">
+    <li><strong>Please don't move, open, or cover it.</strong> Keep the solar panel and the camera window clear. The box is sealed against weather, and opening it can let water in.</li>
+    <li><strong>It is safe.</strong> It runs on a small rechargeable battery charged by its solar panel. It is not connected to the power grid and has no hazardous parts.</li>
+    <li><strong>Tell us if something is wrong:</strong> if it is damaged, has fallen, is in the way, or is about to be swept away by high water. Note the unit number on its label. It starts with UFO, for example <code>UFO-005</code>. See <a href="#contact">Contact</a>.</li>
+
+  </ol>
+  <p>If you are the property owner and want it moved or removed, contact us and we will take care of it.</p>
+</section>
+
+<section id="host" aria-labelledby="host-h">
+  <h2 id="host-h">Hosting a sensor on your property</h2>
+  <p>We look for places that flood: a stream bank, a retention pond, a drainage channel, or a low area of a parking lot or field.</p>
+
+  <h3>What it needs from you</h3>
+  <ul>
+    <li><strong>A mounting spot</strong> with a clear view of the area and a few hours of sun on the solar panel, such as a post, fence, wall, or tree. The box is at most 8 × 8 × 5 inches (20 × 20 × 13 cm). The solar panel is about 17 × 11 inches (44 × 27 cm).</li>
+    <li><strong>Nothing else.</strong> It needs no power or internet connection and runs on its own. Wi-Fi is used only if you choose to offer it.</li>
+    <li><strong>Occasional access</strong> for us to check or service it, arranged with you in advance.</li>
+  </ul>
+
+  <h3>What you can expect from us</h3>
+  <ol class="steps">
+    <li><strong>A site visit first.</strong> We agree on the exact location and the direction the sensor points, and you can see what it sees before we finish.</li>
+    <li><strong>A non-damaging temporary installation with zip ties or pipe clamps.</strong></li>
+    <li><strong>A clear label or QR code</strong> on the unit pointing to this page, so neighbors and passers-by know what it is.</li>
+    <li><strong>Access to your sensor's data.</strong> You can have its water maps, readings, and any photos saved for research. You also get a viewer account on our online dashboard that shows the sensor readings at your location.</li>
+    <li><strong>Removal on request,</strong> at any time and for any reason.</li>
+    <li><strong>We maintain the equipment.</strong> There will be no work on your part.</li>
+  </ol>
+</section>
+
+<section id="faq" aria-labelledby="faq-h">
+  <h2 id="faq-h">Questions</h2>
+  <details>
+    <summary>Is it recording me?</summary>
+    <p>No. It watches an area that might flood and only captures data for a minute or two periodically during the day. What it sends is a water / not-water map plus readings about its own condition, such as the temperature inside the box. Photos that show people are discarded and never leave the device. See <a href="#privacy">Privacy</a>.</p>
+  </details>
+  <details>
+    <summary>Is it a security camera, or does it stream video?</summary>
+    <p>No. It takes still images only when it wakes up, has no live view or video, and its regular reports contain no photos.</p>
+  </details>
+  <details>
+    <summary>Will its radio interfere with my Wi-Fi, phone, or other devices?</summary>
+    <p>No. It primarily uses long-range radio on the 915 MHz band that's open for low-power devices (the same kind used by utility meters and farm sensors), with Wi-Fi (only with prior approval) or its own cellular plan as a backup. Each transmission is a short burst of well under a second.</p>
+  </details>
+  <details>
+    <summary>Why does it matter if it gets moved a little?</summary>
+    <p>Each sensor's view is measured and matched to map coordinates when it is installed. Turning or tilting it shifts every later water map, so the readings stop lining up with the ground.</p>
+  </details>
+  <details>
+    <summary>What happens at night?</summary>
+    <p>It is switched off overnight and wakes again in the morning. The wake times follow sunrise and sunset at its location.</p>
+  </details>
+  <details>
+    <summary>Who runs this project?</summary>
+    <p>HazMapper sensors are part of the Urban Flood Observation Network (UFONet), a research project at Syracuse University funded by the U.S. Geological Survey (USGS).</p>
+  </details>
+  <details>
+    <summary>Can I see how it works?</summary>
+    <p>Yes. See <a href="#technical">How it works</a> below. The sensor's software and build guide are also open source: <a href="https://github.com/mandeeps/SU-WaterCam">the project's source code on GitHub</a>.</p>
+  </details>
+</section>
+
+<section id="contact" aria-labelledby="contact-h">
+  <h2 id="contact-h">Contact</h2>
+  <p>To report a problem with a sensor, ask a question, or talk about hosting one:</p>
+  <p><a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=AqR4Qp4auU6EFP-1Wl_PHrS-VlntsyRJonHf24HmBd5UNUlCVkxHMDFZTUdFTTI5WUgwRTlQRE9EOS4u">Contact the HazMapper sensor team</a> (opens a Microsoft Forms page). No sign-in is needed.</p>
+  <p>If you are writing about a specific sensor, please include the unit number from its label.</p>
+</section>
+
+<section id="technical" aria-labelledby="tech-h">
+  <h2 id="tech-h">How it works: technical details</h2>
+  <p>Most of the time the sensor is switched off. During daylight it wakes for a minute or two, takes its readings, sends a short report, and shuts down again. With the current settings it reports about once an hour. If it detects flooding, it reports every 10 minutes, and nearby sensors switch to every 30 minutes.</p>
+
+  <ul class="cards">
+    <li class="card">
+      <h3>Looks at the area</h3>
+      <p>A regular camera with a near-infrared mode and a low-resolution thermal camera (160 × 120 pixels) point at the same view. Each sees water differently, which makes detection more reliable in glare, shade, and murky conditions.</p>
+    </li>
+    <li class="card">
+      <h3>Works out what is water</h3>
+      <p>A small computer inside the box runs a trained image segmentation model that marks which parts of the scene are water. That map is the main result.</p>
+    </li>
+    <li class="card">
+      <h3>Sends a tiny report</h3>
+      <p>The water map is compressed into a small file and sent over long-range, low-power radio (LoRa), the sensor's main link. Only if LoRa is unavailable does the sensor use its cellular modem, or Wi-Fi where the host offers it, as a backup. These backup links can carry a more detailed version of the map.</p>
+    </li>
+    <li class="card">
+      <h3>Looks after itself</h3>
+      <p>It also reports the temperature and humidity inside the box, its battery level, its tilt, and its GPS position, so we can tell it is working without visiting it.</p>
+    </li>
+  </ul>
+
+  <h3>How data flows through a sensor</h3>
+  <div class="flow-wrap">
+  <ol class="flow">
+    <li><span class="where">On the sensor</span><span class="what">Photos</span><span class="how">of the area, deleted automatically at regular intervals</span></li>
+    <li><span class="where">On the sensor</span><span class="what">Image model</span><span class="how">marks what is water</span></li>
+    <li class="sent"><span class="where">Sent by radio</span><span class="what">Water map</span><span class="how">water / not water, a small file</span></li>
+    <li><span class="where">Research server</span><span class="what">Results</span><span class="how">water extent over time, flood alerts, sensor health</span></li>
+  </ol>
+  </div>
+  <p class="flow-note">The regular reports carry only the water map and sensor readings.</p>
+
+  <h3>Security</h3>
+  <p>Reports to our server are authenticated and encrypted, and remote maintenance access is limited to the research team over an encrypted private network.</p>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>HazMapper sensors are part of the Urban Flood Observation Network (UFONet), a Syracuse University research project funded by the U.S. Geological Survey (USGS).
+    The hardware and software are open source: <a href="https://github.com/mandeeps/SU-WaterCam">project source code on GitHub</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>
