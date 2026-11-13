@@ -3,48 +3,69 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HazMapper Flood Sensors</title>
-<meta name="description" content="What the HazMapper flood sensor of the Urban Flood Observation Network is, why it is useful, how it protects privacy, what to do if you find one, and how to host one.">
+<title>HazMapper Flood Sensors | Urban Flood Observation Network</title>
+<meta name="description" content="What HazMapper flood sensors measure, how they protect privacy, what to do if you find one, and how to host one. A Syracuse University flood research project.">
+<meta name="keywords" content="HazMapper, flood sensor, Urban Flood Observation Network, UFONet, urban flooding, flood monitoring, flood mapping, stream flooding, Syracuse University, USGS, LoRa, open source">
+<meta name="author" content="Urban Flood Observation Network, Syracuse University">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hazmapper.github.io/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#000E54">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
   :root {
-    --bg: #f7f9fa;
+    --bg: #f7f8fa;
     --surface: #ffffff;
-    --text: #1b2429;
-    --muted: #4a5760;
-    --border: #d5dde2;
-    --accent: #0a6680;
-    --accent-soft: #e3f1f5;
-    --warn: #7a4200;
-    --warn-soft: #fff3e0;
+    --text: #1b1f24;
+    --muted: #4b5563;
+    --border: #d8dce3;
+    --heading: #000e54;
+    --accent: #1a3a8f;
+    --accent-soft: #eef1f8;
+    --navy: #000e54;
+    --orange: #f76900;
+    --hero-bg: #eef1f8;
+    --hero-text: #1b1f24;
+    --hero-focus: #c23b00;
+    --warn: #9a3b00;
+    --warn-soft: #fff4ec;
     --ok: #1f6b3a;
     --no: #9b2c2c;
-    --focus: #0a6680;
+    --focus: #c23b00;
     --todo: #fff1a8;
     --todo-text: #4a3d00;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #11171b;
-      --surface: #182126;
-      --text: #e6edf0;
-      --muted: #a3b2ba;
-      --border: #2c3a42;
-      --accent: #5cc3e0;
-      --accent-soft: #15313b;
-      --warn: #ffb866;
-      --warn-soft: #33240f;
+      --bg: #121418;
+      --surface: #1b1e24;
+      --text: #e7e9ee;
+      --muted: #b0b6c1;
+      --border: #2e333c;
+      --heading: #ffffff;
+      --accent: #9cbcff;
+      --accent-soft: #1d2433;
+      --navy: #3d4f99;
+      --orange: #f76900;
+      --hero-bg: #1b1e24;
+      --hero-text: #e7e9ee;
+      --hero-focus: #ffb070;
+      --warn: #ffb070;
+      --warn-soft: #2e2219;
       --ok: #6fd49a;
       --no: #ff9090;
-      --focus: #8fd8ee;
+      --focus: #ffb070;
       --todo: #4a3d00;
       --todo-text: #fff1a8;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #11171b; --surface: #182126; --text: #e6edf0; --muted: #a3b2ba;
-    --border: #2c3a42; --accent: #5cc3e0; --accent-soft: #15313b;
-    --warn: #ffb866; --warn-soft: #33240f; --ok: #6fd49a; --no: #ff9090;
-    --focus: #8fd8ee; --todo: #4a3d00; --todo-text: #fff1a8;
+    --bg: #121418; --surface: #1b1e24; --text: #e7e9ee; --muted: #b0b6c1;
+    --border: #2e333c; --heading: #ffffff; --accent: #9cbcff; --accent-soft: #1d2433;
+    --navy: #3d4f99; --orange: #f76900; --hero-bg: #1b1e24; --hero-text: #e7e9ee;
+    --hero-focus: #ffb070; --warn: #ffb070; --warn-soft: #2e2219; --ok: #6fd49a;
+    --no: #ff9090; --focus: #ffb070; --todo: #4a3d00; --todo-text: #fff1a8;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -66,11 +87,25 @@
   }
   .skip:focus { top: 12px; }
   .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+  header.hero, footer {
+    --focus: var(--hero-focus);
+    background: var(--hero-bg); color: var(--hero-text);
+  }
   header.hero {
-    background: var(--accent-soft);
-    border-bottom: 1px solid var(--border);
+    border-top: 8px solid var(--navy);
+    border-bottom: 4px solid var(--orange);
     padding: 48px 0 40px;
   }
+  .hero .eyebrow {
+    margin: 0 0 8px; font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .hero .eyebrow::before {
+    content: ""; display: inline-block; width: 28px; height: 4px; margin-right: 10px;
+    vertical-align: 0.25em; background: var(--orange); border-radius: 2px;
+  }
+  .hero .eyebrow, .hero h1 { color: var(--heading); }
+  .hero .notice { color: var(--text); }
   .hero h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.2; margin: 0 0 12px; }
   .hero p.lead { font-size: 1.15rem; margin: 0 0 20px; max-width: 40em; }
   nav.jump ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
@@ -79,12 +114,16 @@
     background: var(--surface); border: 1px solid var(--border);
     text-decoration: none; color: var(--text); font-size: 0.95rem;
   }
-  nav.jump a:hover { border-color: var(--accent); text-decoration: underline; }
+  nav.jump a:hover { border-color: var(--orange); text-decoration: underline; }
   section { padding: 40px 0 8px; }
-  h2 { font-size: 1.6rem; margin: 0 0 12px; line-height: 1.25; }
+  h2 { font-size: 1.6rem; margin: 0 0 12px; line-height: 1.25; color: var(--heading); }
+  h2::after {
+    content: ""; display: block; width: 48px; height: 4px; margin-top: 8px;
+    background: var(--orange); border-radius: 2px;
+  }
   h3 { font-size: 1.15rem; margin: 24px 0 8px; }
   .notice {
-    background: var(--warn-soft); border-left: 5px solid var(--warn);
+    background: var(--warn-soft); border-left: 5px solid var(--orange);
     padding: 16px 20px; border-radius: 6px; margin: 16px 0;
   }
   .hero .notice { margin: 0 0 24px; max-width: 40em; }
@@ -92,10 +131,12 @@
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 16px; margin: 16px 0; padding: 0; list-style: none; }
   .card {
     background: var(--surface); border: 1px solid var(--border);
+    border-top: 4px solid var(--orange);
     border-radius: 10px; padding: 18px 20px;
   }
+  .card h3 { color: var(--heading); }
   .card h3 { margin-top: 0; }
-  .card p { margin: 0; color: var(--muted); }
+  .card p { margin: 0; }
   ol.steps { padding-left: 1.4em; }
   ol.steps li { margin-bottom: 8px; }
   ol.flow { list-style: none; padding: 0; margin: 24px 0 8px; max-width: 34em; display: flex; flex-direction: column; gap: 28px; }
@@ -147,13 +188,16 @@
     border-radius: 8px; padding: 12px 16px; margin: 10px 0;
   }
   summary { cursor: pointer; font-weight: 600; }
-  details p { margin: 10px 0 2px; color: var(--muted); }
+  details p { margin: 10px 0 2px; }
   mark.todo { background: var(--todo); color: var(--todo-text); padding: 0 4px; border-radius: 3px; }
   #technical { border-top: 1px solid var(--border); margin-top: 40px; }
-  footer { border-top: 1px solid var(--border); margin-top: 48px; padding: 24px 0 40px; color: var(--muted); font-size: 0.92rem; }
+  footer { border-top: 4px solid var(--orange); margin-top: 48px; padding: 24px 0 40px; font-size: 0.92rem; }
+  footer a { color: var(--accent); }
   @media print {
     .skip, nav.jump { display: none; }
+    header.hero, footer { background: none; color: #000; border-color: #000; }
     header.hero { padding: 16px 0; }
+    footer a { color: #000; }
     details { break-inside: avoid; }
   }
 </style>
@@ -164,6 +208,7 @@
 
 <header class="hero">
   <div class="wrap">
+    <p class="eyebrow">Urban Flood Observation Network</p>
     <h1>This is a HazMapper flood sensor</h1>
     <p class="lead">A small, solar-powered research instrument that watches an area for flooding and reports where water spreads. It is part of the Urban Flood Observation Network (UFONet), a Syracuse University research project funded by the U.S. Geological Survey (USGS) that studies urban and riverside flooding.</p>
     <div class="notice">
